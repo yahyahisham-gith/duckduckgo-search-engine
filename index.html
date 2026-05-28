@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Web Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+        }
+        .search-container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <h2>Search the Whole Web</h2>
+    <!-- DuckDuckGo Form Submission -->
+    <form id="globalSearchForm" action="https://duckduckgo.com/" method="get" target="_blank">
+        <input type="text" name="q" id="searchQuery" placeholder="Type anything..." required>
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('globalSearchForm').addEventListener('submit', function(e) {
+    const query = document.getElementById('searchQuery').value.toLowerCase();
+    
+    // --- PROMOTION LOGIC ---
+    // Define keywords that should promote your websites
+    const myPromotions = {
+        "cut the rope": "https://cutherope.vercel.app",
+        "crazy cattle 3D": "https://crazy-cattl-e-3-d.vercel.app/",
+        "bloxorz": "https://blox-orz.vercel.app/"
+    };
+
+    // Check if the user's search contains one of your promotional keywords
+    for (const keyword in myPromotions) {
+        if (query.includes(keyword)) {
+            // Open your promoted website in a new tab instantly
+            window.open(myPromotions[keyword], '_blank');
+            break; 
+        }
+    }
+    // The form continues running normally, opening the full web results in another tab
+});
+</script>
+
+</body>
+</html>
