@@ -116,72 +116,50 @@
 </div>
 
 <script>
-const searchInput = document.getElementById('searchQuery');
-const promoBanner = document.getElementById('promoBanner');
-const promoTitle = document.getElementById('promoTitle');
-const promoDesc = document.getElementById('promoDesc');
-const promoHref = document.getElementById('promoHref');
-
-// Your custom links and keyword triggers
-const promotions = [
-    {
-        keywords: ["cut the rope", "cut", "rope", "om nom"],
-        title: "🟢 Play Cut the Rope",
-        desc: "Cut strings, collect stars, and feed Om Nom in this classic physics puzzle game!",
-        url: "https://cutherope.vercel.app"
-    },
-    {
-        keywords: ["crazy cattle 3d", "crazy", "cattle", "3d", "cow"],
-        title: "🐮 Play Crazy Cattle 3D",
-        desc: "Run wild, smash obstacles, and control the herd in a fully simulated 3D setting.",
-        url: "https://crazy-cattl-e-3-d.vercel.app/"
-    },
-    {
-        keywords: ["bloxorz", "block", "hole", "roll"],
-        title: "🧱 Play Bloxorz",
-        desc: "Test your spatial skills! Navigate the metallic block through the grid into the target square.",
-        url: "https://blox-orz.vercel.app/"
-    }
-];
-
-// Scan input as they type to instantly display the recommendation
-searchInput.addEventListener('input', function() {
-    const val = this.value.toLowerCase().trim();
-    let matchFound = false;
-
-    if (val.length > 1) {
-        for (const promo of promotions) {
-            // Check if input matches any of our keywords
-            const match = promo.keywords.some(keyword => val.includes(keyword));
-            if (match) {
-                promoTitle.innerText = promo.title;
-                promoDesc.innerText = promo.desc;
-                promoHref.href = promo.url;
-                promoBanner.style.display = "block";
-                matchFound = true;
-                break;
-            }
-        }
-    }
-
-    if (!matchFound) {
-        promoBanner.style.display = "none";
-    }
-});
-
-// If the page was opened with ?q=..., forward the same query to DuckDuckGo
 (function forwardQueryToDuckDuckGo() {
   try {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q');
+    const search = window.location.search || '';
+    if (!search) return;
+
+    const params = new URLSearchParams(search);
+    let q = params.get('q');
+    let isBareEquals = false;
+
+    if ((q === null || q.trim() === '') && search.startsWith('?=')) {
+      q = search.substring(2);
+      isBareEquals = true;
+    } else if ((q === null || q.trim() === '') && search.startsWith('?')) {
+      const eqIndex = search.indexOf('=');
+      if (eqIndex !== -1) {
+        const possible = search.substring(eqIndex + 1);
+        if (possible) {
+          q = possible;
+          // treat as bare if there was no 'q' param name before '='
+          const name = search.substring(1, eqIndex);
+          if (name === '') isBareEquals = true;
+        }
+      }
+    }
+
     if (q !== null && q.trim() !== '') {
-      const ddgUrl = new URL('https://duckduckgo.com/');
-      ddgUrl.searchParams.set('q', q);
-      // Replace current history entry so user doesn't need to press back multiple times
-      window.location.replace(ddgUrl.toString());
+      const decoded = decodeURIComponent(q.replace(/\+/g, ' '));
+      const redirect = () => {
+        const ddgUrl = new URL('https://duckduckgo.com/');
+        ddgUrl.searchParams.set('q', decoded);
+        window.location.replace(ddgUrl.toString());
+      };
+
+      if (isBareEquals) {
+        // Confirm with the user before redirecting when the query came from "?="
+        const proceed = window.confirm('Search detected. Redirect to DuckDuckGo for: "' + decoded + '" ?');
+        if (proceed) redirect();
+        // If cancelled, do nothing
+      } else {
+        // Normal ?q= flow: redirect immediately
+        redirect();
+      }
     }
   } catch (e) {
-    // Fail silently if URL parsing isn't supported or any other error occurs
     console.error('Redirect to DuckDuckGo failed:', e);
   }
 })();
