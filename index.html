@@ -169,45 +169,16 @@ searchInput.addEventListener('input', function() {
     }
 });
 
-// Redirect/confirm logic added without removing promotions
+// If the page was opened with ?q=... forward the same query to DuckDuckGo.
 (function forwardQueryToDuckDuckGo() {
   try {
-    const search = window.location.search || '';
-    if (!search) return;
-
-    const params = new URLSearchParams(search);
-    let q = params.get('q');
-    let isBareEquals = false;
-
-    if ((q === null || q.trim() === '') && search.startsWith('?=')) {
-      q = search.substring(2);
-      isBareEquals = true;
-    } else if ((q === null || q.trim() === '') && search.startsWith('?')) {
-      const eqIndex = search.indexOf('=');
-      if (eqIndex !== -1) {
-        const possible = search.substring(eqIndex + 1);
-        if (possible) {
-          q = possible;
-          const name = search.substring(1, eqIndex);
-          if (name.trim() === '') isBareEquals = true;
-        }
-      }
-    }
-
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
     if (q !== null && q.trim() !== '') {
       const decoded = decodeURIComponent(q.replace(/\+/g, ' '));
-      const redirect = () => {
-        const ddgUrl = new URL('https://duckduckgo.com/');
-        ddgUrl.searchParams.set('q', decoded);
-        window.location.replace(ddgUrl.toString());
-      };
-
-      if (isBareEquals) {
-        const proceed = window.confirm('Search detected. Redirect to DuckDuckGo for: "' + decoded + '" ?');
-        if (proceed) redirect();
-      } else {
-        redirect();
-      }
+      const ddgUrl = new URL('https://duckduckgo.com/');
+      ddgUrl.searchParams.set('q', decoded);
+      window.location.replace(ddgUrl.toString());
     }
   } catch (e) {
     console.error('Redirect to DuckDuckGo failed:', e);
